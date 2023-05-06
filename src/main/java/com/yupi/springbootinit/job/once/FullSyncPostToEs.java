@@ -3,7 +3,7 @@ package com.yupi.springbootinit.job.once;
 import com.yupi.springbootinit.esdao.PostEsDao;
 import com.yupi.springbootinit.model.dto.post.PostEsDTO;
 import com.yupi.springbootinit.model.entity.Post;
-import com.yupi.springbootinit.service.PostService;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Resource;
@@ -22,27 +22,27 @@ import org.springframework.boot.CommandLineRunner;
 @Slf4j
 public class FullSyncPostToEs implements CommandLineRunner {
 
-    @Resource
-    private PostService postService;
+//    @Resource
+//    private PostService postService;
 
     @Resource
     private PostEsDao postEsDao;
 
     @Override
     public void run(String... args) {
-        List<Post> postList = postService.list();
-        if (CollectionUtils.isEmpty(postList)) {
-            return;
-        }
-        List<PostEsDTO> postEsDTOList = postList.stream().map(PostEsDTO::objToDto).collect(Collectors.toList());
-        final int pageSize = 500;
-        int total = postEsDTOList.size();
-        log.info("FullSyncPostToEs start, total {}", total);
-        for (int i = 0; i < total; i += pageSize) {
-            int end = Math.min(i + pageSize, total);
-            log.info("sync from {} to {}", i, end);
-            postEsDao.saveAll(postEsDTOList.subList(i, end));
-        }
-        log.info("FullSyncPostToEs end, total {}", total);
+//        List<Post> postList = postService.list();
+//        if (CollectionUtils.isEmpty(postList)) {
+//            return;
+//        }
+//        List<PostEsDTO> postEsDTOList = postList.stream().map(PostEsDTO::objToDto).collect(Collectors.toList());
+//        final int pageSize = 500;
+//        int total = postEsDTOList.size();
+//        log.info("FullSyncPostToEs start, total {}", total);
+//        for (int i = 0; i < total; i += pageSize) {
+//            int end = Math.min(i + pageSize, total);
+//            log.info("sync from {} to {}", i, end);
+//            postEsDao.saveAll(postEsDTOList.subList(i, end));
+//        }
+//        log.info("FullSyncPostToEs end, total {}", total);
     }
 }

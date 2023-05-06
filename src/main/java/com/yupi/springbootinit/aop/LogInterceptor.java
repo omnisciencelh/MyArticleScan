@@ -20,7 +20,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  **/
 @Aspect
-@Component
+//@Component
 @Slf4j
 public class LogInterceptor {
 

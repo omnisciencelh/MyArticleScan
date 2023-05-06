@@ -12,5 +12,8 @@ CREATE TABLE article (
     cover          text            COMMENT '文章封面',
     createTime     datetime        DEFAULT CURRENT_TIMESTAMP COMMENT '文章创建时间，默认为当前时间',
     updateTime     datetime        DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '文章更新时间，默认为修改时间',
-    tags           varchar(1024)   COMMENT '文章标签'
+    tags           varchar(1024)   COMMENT '文章标签',
+    path            varchar(1024)   COMMENT '文章路劲'
 ) ENGINE=InnoDB CHARSET=UTF8MB4 COMMENT '存储文章相关信息的表';
+
+# ALTER TABLE article ADD path varchar(1024);
