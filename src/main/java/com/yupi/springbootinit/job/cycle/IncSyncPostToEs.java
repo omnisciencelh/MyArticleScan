@@ -1,11 +1,5 @@
 package com.yupi.springbootinit.job.cycle;
 
-import com.yupi.springbootinit.esdao.PostEsDao;
-import com.yupi.springbootinit.model.dto.post.PostEsDTO;
-import com.yupi.springbootinit.model.entity.Post;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,8 +19,8 @@ public class IncSyncPostToEs {
 //    @Resource
 //    private PostMapper postMapper;
 
-    @Resource
-    private PostEsDao postEsDao;
+//    @Resource
+//    private PostEsDao postEsDao;
 
     /**
      * 每分钟执行一次

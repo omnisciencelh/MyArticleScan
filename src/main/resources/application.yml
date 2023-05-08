@@ -31,8 +31,8 @@ spring:
 #    password: 123456
   # Elasticsearch 配置
   # todo 需替换配置，然后取消注释
-#  elasticsearch:
-#    uris: http://localhost:9200
+  elasticsearch:
+    uris: http://localhost:9200
 #    username: root
 #    password: 123456
   # 文件上传

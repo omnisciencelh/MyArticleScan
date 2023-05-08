@@ -1,12 +1,12 @@
 package com.yupi.springbootinit.job.once;
 
-import com.yupi.springbootinit.esdao.PostEsDao;
-import com.yupi.springbootinit.model.dto.post.PostEsDTO;
-import com.yupi.springbootinit.model.entity.Post;
+import com.yupi.springbootinit.esdao.ArticleEsDao;
+import com.yupi.springbootinit.model.entity.Article;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Resource;
+
+import com.yupi.springbootinit.service.ArticleService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.CommandLineRunner;
@@ -21,28 +21,26 @@ import org.springframework.boot.CommandLineRunner;
 //@Component
 @Slf4j
 public class FullSyncPostToEs implements CommandLineRunner {
-
-//    @Resource
-//    private PostService postService;
+    @Resource
+    private ArticleService articleService;
 
     @Resource
-    private PostEsDao postEsDao;
+    private ArticleEsDao articleEsDao;
 
     @Override
     public void run(String... args) {
-//        List<Post> postList = postService.list();
-//        if (CollectionUtils.isEmpty(postList)) {
-//            return;
-//        }
-//        List<PostEsDTO> postEsDTOList = postList.stream().map(PostEsDTO::objToDto).collect(Collectors.toList());
-//        final int pageSize = 500;
-//        int total = postEsDTOList.size();
-//        log.info("FullSyncPostToEs start, total {}", total);
-//        for (int i = 0; i < total; i += pageSize) {
-//            int end = Math.min(i + pageSize, total);
-//            log.info("sync from {} to {}", i, end);
-//            postEsDao.saveAll(postEsDTOList.subList(i, end));
-//        }
-//        log.info("FullSyncPostToEs end, total {}", total);
+        List<Article> articleList = articleService.list();
+        if (CollectionUtils.isEmpty(articleList)) {
+            return;
+        }
+        final int pageSize = 500;
+        int total = articleList.size();
+        log.info("FullSyncPostToEs start, total {}", total);
+        for (int i = 0; i < total; i += pageSize) {
+            int end = Math.min(i + pageSize, total);
+            log.info("sync from {} to {}", i, end);
+            articleEsDao.saveAll(articleList.subList(i, end));
+        }
+        log.info("FullSyncPostToEs end, total {}", total);
     }
 }
