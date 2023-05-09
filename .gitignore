@@ -3,7 +3,8 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-
+sql/create_table.sql
+sql/post_es_mapping.json
 ### STS ###
 .apt_generated
 .classpath
