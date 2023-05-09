@@ -1,10 +1,8 @@
 package com.yupi.springbootinit.esdao;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-import com.yupi.springbootinit.model.entity.Article;
-import org.springframework.data.domain.Pageable;
+import com.yupi.springbootinit.model.dto.article.ArticleEsDTD;
 import org.springframework.data.elasticsearch.annotations.Highlight;
 import org.springframework.data.elasticsearch.annotations.HighlightField;
 import org.springframework.data.elasticsearch.annotations.Query;
@@ -17,15 +15,23 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
  * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
  * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
-public interface ArticleEsDao extends ElasticsearchRepository<Article, Long> {
+public interface ArticleEsDao extends ElasticsearchRepository<ArticleEsDTD, Long> {
 
 
-    List<Article> findAllByPath(String path);
+    List<ArticleEsDTD> findAllByPath(String path);
 
+    @Query("{\"bool\": {\"must\": [{\"term\": {\"path.keyword\": \"?0\"}}]}}")
+    List<ArticleEsDTD> findByPath(String path);
+
+    List<ArticleEsDTD> findArticleEsDTDByPath(String path);
+
+    List<ArticleEsDTD> findByPathIs(String path);
+
+    List<ArticleEsDTD>findArticleByPath(String path);
 
     @Highlight(fields = {
             @HighlightField(name = "title"),
             @HighlightField(name = "content")
     })
-    List<SearchHit<Article>> findArticlesByContentContainingOrTitleContainingOrTagsContaining(String content, String title,String tags);
+    List<SearchHit<ArticleEsDTD>> findArticlesByContentContainingOrTitleContainingOrTagsContaining(String content, String title,String tags);
 }

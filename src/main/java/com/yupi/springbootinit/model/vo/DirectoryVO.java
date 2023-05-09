@@ -1,6 +1,5 @@
 package com.yupi.springbootinit.model.vo;
 
-import lombok.Data;
 
 import java.util.List;
 

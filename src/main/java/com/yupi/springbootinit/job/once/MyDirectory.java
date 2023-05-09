@@ -1,11 +1,17 @@
 package com.yupi.springbootinit.job.once;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
+import com.yupi.springbootinit.common.BaseResponse;
+import com.yupi.springbootinit.esdao.ArticleEsDao;
+import com.yupi.springbootinit.model.dto.article.ArticleEsDTD;
 import com.yupi.springbootinit.model.entity.Article;
 import com.yupi.springbootinit.model.vo.DirectoryVO;
-import io.swagger.models.auth.In;
+import com.yupi.springbootinit.model.vo.PathOfFile;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +21,9 @@ import java.util.stream.Collectors;
  */
 @Component
 public class MyDirectory implements CommandLineRunner{
+
+    @Resource
+    private ArticleEsDao articleEsDao;
 
      private int curIndex = -1;
     /**
@@ -46,7 +55,7 @@ public class MyDirectory implements CommandLineRunner{
     /**
      * 标签树
      */
-    private DirectoryVO directoryVO = new DirectoryVO("文章",null);
+    private DirectoryVO directoryVO = new DirectoryVO("我的目录",null);
 
 
 
@@ -137,10 +146,16 @@ public class MyDirectory implements CommandLineRunner{
         return deepPath(directoryVO1,map,list);
     }
 
+    /**
+     * 通过最多关键词，确定最深路径
+     * @param directoryVO
+     * @param map
+     * @param list
+     * @return
+     */
     public List<String> deepPath(DirectoryVO directoryVO, Map<String, Integer> map,List<String> list){
-        if(directoryVO==null){
-
-        }
+//        if(directoryVO==null){
+//        }
         int max = 0;
         DirectoryVO t = null;
         for(DirectoryVO d : directoryVO.getChildren()){
@@ -155,7 +170,7 @@ public class MyDirectory implements CommandLineRunner{
         list.add(t.getDirName());
         return deepPath(t,map,list);
     }
-    /**
+    /**根据子目录找路径
      * @param label
      * @param directoryVO
      * @param path
@@ -165,14 +180,18 @@ public class MyDirectory implements CommandLineRunner{
         if(directoryVO == null){
             return null;
         }
+        if(label.equals(directoryVO.getDirName())){
+            path.add(directoryVO.getDirName());
+            return directoryVO;
+        }
         for(DirectoryVO child:directoryVO.getChildren()){
             //操作数
-            String dirName = child.getDirName();
-            path.add(dirName);
-            if(label.equals(dirName)){
-                //找到了
-                return  child;
-            }
+//            String dirName = child.getDirName();
+//            path.add(dirName);
+//            if(label.equals(dirName)){
+//                //找到了
+//                return  child;
+//            }
             //没找到,继续递🐢
             DirectoryVO res = dept(label, child, path);
             if(res!=null){
@@ -180,7 +199,7 @@ public class MyDirectory implements CommandLineRunner{
                 return res;
             }
             //返回现场
-            path.remove(path.size()-1);
+//            path.remove(path.size()-1);
         }
         return null;
     }
@@ -209,6 +228,13 @@ public class MyDirectory implements CommandLineRunner{
         return isExist(directoryVO,list,1);
     }
 
+    /**
+     * 判断路径是否存在
+     * @param directoryVO
+     * @param list
+     * @param index
+     * @return
+     */
     private boolean isExist(DirectoryVO directoryVO,List<String> list,int index){
         if(index == list.size()){
             return true;
@@ -222,4 +248,59 @@ public class MyDirectory implements CommandLineRunner{
         return false;
     }
 
+    /**
+     * 根据路径获取其下的所有文件
+     * @param path
+     * @return
+     */
+    public PathOfFile searchAllChildByPath(String path) {
+
+        //获取到路径
+        JSONArray array = JSONUtil.parseArray(path);
+        List<String> list = array.toList(String.class);
+        //获取最后一层目录下的DirectoryVO对象
+        DirectoryVO d = dept(list.get(list.size() - 1), directoryVO, new ArrayList<>());
+        PathOfFile pathOfFile = new PathOfFile();
+        pathOfFile.setId(list.size()+"");
+        pathOfFile.setName(list.get(list.size()-1));
+        pathOfFile.setPath(list.toString());
+        //开始找它的孩子啦
+        searchMyChild(d,pathOfFile);
+        return pathOfFile;
+    }
+
+    /**
+     * 找me的孩子，所有孩子（目录，文章）
+     * @param directoryVO
+     * @param me
+     */
+    public void searchMyChild(DirectoryVO directoryVO,PathOfFile me){
+        if(directoryVO==null){
+            //空的孩子
+            return;
+        }
+        //找到了所有的文章孩子
+//        List<ArticleEsDTD> myArticleChildren = articleEsDao.findAllByPath(me.getPath());
+        List<ArticleEsDTD> myArticleChildren = articleEsDao.findByPath(me.getPath());
+        me.setArticleEsDTDList(myArticleChildren);
+        //找到所有的孩子目录
+        JSONArray array = JSONUtil.parseArray(me.getPath());
+        List<String> list = array.toList(String.class);
+        List<PathOfFile> children = new ArrayList<>();
+        if(directoryVO.getChildren()==null || directoryVO.getChildren().isEmpty()){
+            //说明没有孩子了
+            return;
+        }
+        for(DirectoryVO d : directoryVO.getChildren()){
+            List<String> tmp = new ArrayList<>(list);
+            tmp.add(d.getDirName());
+            PathOfFile pathOfFile = new PathOfFile();
+            pathOfFile.setPath(tmp.toString());
+            pathOfFile.setName(d.getDirName());
+            pathOfFile.setId((Integer.parseUnsignedInt(me.getId())+1)+"");
+            searchMyChild(d,pathOfFile);
+            children.add(pathOfFile);
+        }
+        me.setPathOfFileList(children);
+    }
 }

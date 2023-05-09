@@ -1,9 +1,11 @@
 package com.yupi.springbootinit.job.once;
 
 import com.yupi.springbootinit.esdao.ArticleEsDao;
+import com.yupi.springbootinit.model.dto.article.ArticleEsDTD;
 import com.yupi.springbootinit.model.entity.Article;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import com.yupi.springbootinit.service.ArticleService;
@@ -39,7 +41,8 @@ public class FullSyncPostToEs implements CommandLineRunner {
         for (int i = 0; i < total; i += pageSize) {
             int end = Math.min(i + pageSize, total);
             log.info("sync from {} to {}", i, end);
-            articleEsDao.saveAll(articleList.subList(i, end));
+            List<ArticleEsDTD> collect = articleList.stream().map(ArticleEsDTD::ArticleToEsDTO).collect(Collectors.toList());
+            articleEsDao.saveAll(collect.subList(i, end));
         }
         log.info("FullSyncPostToEs end, total {}", total);
     }

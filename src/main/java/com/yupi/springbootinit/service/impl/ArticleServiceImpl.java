@@ -11,9 +11,11 @@ import com.yupi.springbootinit.common.ResultUtils;
 import com.yupi.springbootinit.esdao.ArticleEsDao;
 import com.yupi.springbootinit.job.once.MyDirectory;
 import com.yupi.springbootinit.mapper.ArticleMapper;
-import com.yupi.springbootinit.model.dto.ArticleRequest;
+import com.yupi.springbootinit.model.dto.article.ArticleRequest;
+import com.yupi.springbootinit.model.dto.article.ArticleEsDTD;
 import com.yupi.springbootinit.model.entity.Article;
 
+import com.yupi.springbootinit.model.vo.PathOfFile;
 import com.yupi.springbootinit.service.ArticleService;
 
 import org.springframework.data.domain.PageRequest;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Stream;
 
 
 /**
@@ -72,9 +73,13 @@ implements ArticleService {
     }
 
 
-
+    /**
+     * 根据目录查询
+     * @param articleRequest
+     * @return
+     */
     @Override
-    public BaseResponse<List<Article>> searchByDir(ArticleRequest articleRequest) {
+    public BaseResponse<List<ArticleEsDTD>> searchByDir(ArticleRequest articleRequest) {
 
         String searchText = articleRequest.getSearchText();
         //目录有效且存在
@@ -85,11 +90,17 @@ implements ArticleService {
         int pageSize = (int)articleRequest.getPageSize();
         System.out.println("分页参数Page:"+current+",size:"+pageSize);
         Pageable pageable = PageRequest.of(current, pageSize);
-        List<Article> list = articleEsDao.findAllByPath(searchText);
+        List<ArticleEsDTD> list = articleEsDao.findAllByPath(searchText);
         return ResultUtils.success(list);
     }
+
+    /**
+     * 根据内容,tags，title查询
+     * @param articleRequest
+     * @return
+     */
     @Override
-    public BaseResponse<List<Article>> searchByTitleOrContent(ArticleRequest articleRequest) {
+    public BaseResponse<List<ArticleEsDTD>> searchByTitleOrContent(ArticleRequest articleRequest) {
         String searchText = articleRequest.getSearchText();
         int current =(int) articleRequest.getCurrent();
         int pageSize = (int)articleRequest.getPageSize();
@@ -98,12 +109,13 @@ implements ArticleService {
         if(!(searchText!=null && searchText.length()!=0)){
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
         }
-        List<SearchHit<Article>> articles = articleEsDao.findArticlesByContentContainingOrTitleContainingOrTagsContaining(searchText, searchText,searchText);
-        List<Article> list = new ArrayList<>();
-        for (SearchHit<Article> a: articles){
-            Article article = a.getContent();
+        List<SearchHit<ArticleEsDTD>> articles = articleEsDao.findArticlesByContentContainingOrTitleContainingOrTagsContaining(searchText, searchText,searchText);
+        List<ArticleEsDTD> list = new ArrayList<>();
+        for (SearchHit<ArticleEsDTD> a: articles){
+            ArticleEsDTD articleEsDTD = a.getContent();
             List<String> contentList = a.getHighlightField("content");
             List<String> titleList = a.getHighlightField("title");
+            //处理数据
             StringBuffer content = new StringBuffer();StringBuffer title = new StringBuffer();
             if(contentList!=null && !contentList.isEmpty()){
                 contentList.stream().forEach(content::append);
@@ -114,9 +126,19 @@ implements ArticleService {
             Map<String,String> map = new HashMap<>();
             map.put("content",content.toString());
             map.put("title",title.toString());
-            article.setHighLight(map);
-            list.add(article);
+            articleEsDTD.setHighLight(map);
+            list.add(articleEsDTD);
         }
         return ResultUtils.success(list);
+    }
+
+    @Override
+    public BaseResponse<PathOfFile> searchAllChildByPath(ArticleRequest articleRequest) {
+        String searchText = articleRequest.getSearchText();
+        //目录有效且存在
+        if(!(searchText!=null && searchText.length()!=0)){
+            return ResultUtils.error(ErrorCode.PARAMS_ERROR);
+        }
+        return ResultUtils.success(myDirectory.searchAllChildByPath(searchText));
     }
 }
