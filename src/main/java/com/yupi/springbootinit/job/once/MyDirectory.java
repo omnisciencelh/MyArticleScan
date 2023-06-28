@@ -57,7 +57,9 @@ public class MyDirectory implements CommandLineRunner{
      */
     private DirectoryVO directoryVO = new DirectoryVO("我的目录",null);
 
-
+    public DirectoryVO getDirectoryVO() {
+        return directoryVO;
+    }
 
     @Override
     public void run(String... args){
@@ -71,7 +73,8 @@ public class MyDirectory implements CommandLineRunner{
      * 构建目录树
      * @return
      */
-    private List<DirectoryVO> createTree(){
+//    private List<DirectoryVO> createTree(){
+    public List<DirectoryVO> createTree(){
         curIndex++;
         List<DirectoryVO> list = new ArrayList<>();
         for(;curIndex < dirArr.length;curIndex++){

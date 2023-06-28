@@ -40,6 +40,10 @@ implements ArticleService {
     @Resource
     private ArticleEsDao articleEsDao;
 
+    public static void main(String[] args) {
+        ArticleServiceImpl articleService = new ArticleServiceImpl();
+        articleService.pullingMyArticle(10,10);
+    }
     @Override
     public void pullingMyArticle(int current,int pageSize){
         FileReader fileReader = new FileReader("D:\\其它语言工程项目\\实习项目\\MyArticleScan\\json\\myData.json");
